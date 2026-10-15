@@ -129,8 +129,7 @@ Three things change once the noise is realistic:
 **Note on the submitted video.** The presentation video was recorded before the raw + swap control was added. It
 attributes the `FakeManilaV2` gain to T1 relaxation, a bit-flip-like error a Z-parity check can see, and presents the
 snapshot as a case where detection pays. The control above supersedes that interpretation: the gain came from reading
-`data_1` on a better qubit, and the parity check itself did not pay on this snapshot either. The slide outline and
-script in `presentation/` state the corrected finding.
+`data_1` on a better qubit, and the parity check itself did not pay on this snapshot either.
 
 ## Limits on the Claim
 
@@ -179,7 +178,6 @@ tests/                  focused scientific and integration checks
 results/                basis-level and aggregated CSV data, run metadata for both studies
 figures/                generated circuits and result figures
 notebooks/              executed judge-facing demonstration
-presentation/           nine-slide outline and 7-8 minute script
 Q_TRUST_submission.zip  clean package of the tracked files (rebuild command above)
 CHALLENGE_README.md      preserved organizer brief
 CITATIONS.md             sources and reused-material disclosures
