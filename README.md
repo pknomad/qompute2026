@@ -146,7 +146,11 @@ jupyter nbconvert --to notebook --execute --inplace notebooks/QTrust_Demo.ipynb
 ```
 
 Useful runner options are `--shots`, `--seed`, `--skip-detector-grid`, `--skip-fake-manila`, and `--output-dir`.
-The full workflow takes a few minutes on a laptop.
+The full workflow takes a few minutes on a laptop. Rebuild the submission package after any change with:
+
+```
+git ls-files | grep -v Q_TRUST_submission.zip | zip -q Q_TRUST_submission.zip -@
+```
 
 ## Repository Guide
 
@@ -155,21 +159,20 @@ src/qtrust/             circuit, analysis, experiment, and plotting modules
 run_experiment.py       one-command reproducible workflow (controlled channel)
 run_hardware_experiment.py  device-like noise study (synthetic sweep + FakeManilaV2 snapshot)
 tests/                  focused scientific and integration checks
-results/                basis-level and aggregated CSV data
+results/                basis-level and aggregated CSV data, run metadata for both studies
 figures/                generated circuits and result figures
 notebooks/              executed judge-facing demonstration
 presentation/           eight-slide outline and 6-7 minute script
+Q_TRUST_submission.zip  clean package of the tracked files (rebuild command above)
 CHALLENGE_README.md      preserved organizer brief
 CITATIONS.md             sources and reused-material disclosures
 ```
 
 ## Team and Submission
 
-- Team members: **TODO before submission**
-- Contributions: **TODO before submission**
-- Video: **TODO before submission**
+- Team: **Team 20** — Jason Kang, Rut Patel, Resham Patil, Alan Ma
 
 ## References and License
 
-See [CITATIONS.md](CITATIONS.md) for the challenge, Qiskit, Bell-state, and parity-check sources. The code and data are released under [CC0 1.0](LICENSE) (public domain dedication). No code or prose from the supplied starter notebook was copied into the implementation.
+See [CITATIONS.md](CITATIONS.md) for the challenge, Qiskit, Bell-state, and parity-check sources. The code is released under the [MIT License](LICENSE). No code or prose from the supplied starter notebook was copied into the implementation.
 
