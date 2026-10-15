@@ -1,0 +1,12 @@
+qiskit==2.5.2
+qiskit-aer==0.17.2
+numpy==2.5.4
+pandas==3.0.6
+matplotlib==3.11.2
+jupyter==1.1.1
+nbconvert==7.17.2
+nbformat==5.11.1
+ipykernel==7.4.0
+pytest==9.1.1
+pylatexenc==2.11
+

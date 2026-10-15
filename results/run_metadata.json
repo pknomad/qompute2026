@@ -1,0 +1,28 @@
+{
+  "shots_per_basis": 8192,
+  "seed_simulator": 2026,
+  "seed_transpiler": 2026,
+  "optimization_level": 0,
+  "data_noise_values": [
+    0.0,
+    0.01,
+    0.02,
+    0.05,
+    0.1,
+    0.15,
+    0.2
+  ],
+  "detector_noise_values": [
+    0.0,
+    0.005,
+    0.01,
+    0.02
+  ],
+  "runtime_seconds": 0.27201117500226246,
+  "python": "3.12.14",
+  "qiskit": "2.5.2",
+  "qiskit_aer": "0.17.2",
+  "numpy": "2.5.4",
+  "pandas": "3.0.6",
+  "matplotlib": "3.11.2"
+}
