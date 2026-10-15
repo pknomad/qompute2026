@@ -76,7 +76,7 @@ The detector-noise grid separates two regimes. With perfect data at `p=0`, detec
 
 ![Detector usefulness heatmap](figures/detector_usefulness.png)
 
-The black contour is the sampled boundary where detected and raw fidelity are equal. The grid supports an operating-region claim, not a universal hardware threshold.
+Cells are centred on the sampled `(p, q)` values, so the grid is not uniform. The black contour is the sampled boundary where detected and raw fidelity are equal. The grid supports an operating-region claim, not a universal hardware threshold.
 
 ### Does It Still Help Under Device-Like Noise?
 
@@ -85,36 +85,46 @@ column is a sanity check rather than a discovery. `run_hardware_experiment.py` r
 comparison under noise that looks like a device instead: depolarizing error on **every** two-qubit gate (including the
 Bell CNOT and the detector CNOTs), small single-qubit error, **readout error**, and routing on a five-qubit line
 (the `ibmq_manila` coupling map), where the detector's second CNOT costs a SWAP. The three synthetic rates are scaled
-together (`x1` is roughly a 2021 Falcon, `x4` is 2016-class, `x0.4` matches a 2026 Heron two-qubit error), and the
-calibration snapshot shipped as `FakeManilaV2` is run as a reference point. Readout-error mitigation (a 4x4
-assignment-matrix inversion from four calibration circuits) is included because it targets exactly the error a parity
-check cannot see.
+together (`x1` is roughly a 2021 Falcon, `x4` is 2016-class, `x0.5` is close to a 2026 Heron two-qubit error), and the
+calibration snapshot shipped as `FakeManilaV2` is run as a reference point, once as shipped and once with its readout
+error removed. Readout-error mitigation (a 4x4 assignment-matrix inversion from four calibration circuits) is included
+because it targets exactly the error a parity check cannot see.
 
-| Noise source | Raw | Parity detected | Acceptance | Raw + readout mitigation | Detected + readout mitigation |
-| --- | --- | --- | --- | --- | --- |
-| synthetic x0.5 (Heron-like gates) | 0.964 +/- 0.001 | 0.959 +/- 0.002 | 0.975 | 0.995 +/- 0.001 | 0.990 +/- 0.001 |
-| synthetic x1 (Falcon-like) | 0.929 +/- 0.002 | 0.919 +/- 0.002 | 0.949 | 0.989 +/- 0.001 | 0.978 +/- 0.001 |
-| synthetic x4 (2016-like) | 0.755 +/- 0.004 | 0.711 +/- 0.004 | 0.820 | 0.967 +/- 0.001 | 0.905 +/- 0.003 |
-| `FakeManilaV2` snapshot | 0.814 +/- 0.003 | 0.897 +/- 0.003 | 0.882 | 0.978 +/- 0.001 | 1.000 +/- 0.000 |
+**The comparison needs a control.** Routing the detector moves `data_1` from physical qubit 2 to qubit 3, so the
+detected circuit reads its data from different qubits than the raw circuit does (the `data_qubits` column in the CSV
+records this). On a device with uneven readout error that move alone changes the answer. The study therefore also runs
+**raw + swap**: the Bell pair plus the same SWAP, with no parity check. Detected minus raw + swap is what the check
+itself does; raw + swap minus raw is what the routing costs. The readout-mitigation matrix is calibrated on the qubits
+each circuit's data bits are actually read from after routing, not on the initial layout.
 
-Routed circuit cost on the line: raw **1 CNOT, depth 8**; detected **6 CNOTs, depth 13** (two detector CNOTs plus one
-SWAP). The full table is regenerated into `results/hardware_results.csv`.
+| Noise source | Raw | Raw + swap (control) | Parity detected | Acceptance | Raw + readout mitigation | Detected + readout mitigation |
+| --- | --- | --- | --- | --- | --- | --- |
+| synthetic x0.5 (Heron-like gates) | 0.964 +/- 0.001 | 0.952 +/- 0.002 | 0.959 +/- 0.002 | 0.975 | 0.995 +/- 0.001 | 0.990 +/- 0.001 |
+| synthetic x1 (Falcon-like) | 0.929 +/- 0.002 | 0.908 +/- 0.002 | 0.919 +/- 0.002 | 0.949 | 0.989 +/- 0.001 | 0.978 +/- 0.001 |
+| synthetic x4 (2016-like) | 0.755 +/- 0.004 | 0.698 +/- 0.004 | 0.711 +/- 0.004 | 0.820 | 0.967 +/- 0.001 | 0.905 +/- 0.003 |
+| `FakeManilaV2` snapshot | 0.814 +/- 0.003 | 0.904 +/- 0.002 | 0.897 +/- 0.003 | 0.882 | 0.978 +/- 0.001 | 0.949 +/- 0.002 |
+| `FakeManilaV2`, readout error removed | 0.981 +/- 0.001 | 0.957 +/- 0.002 | 0.949 +/- 0.002 | 0.982 | 0.982 +/- 0.001 | 0.950 +/- 0.002 |
+
+Routed circuit cost on the line: raw **1 CNOT, depth 8**; raw + swap **4 CNOTs, depth 11**; detected **6 CNOTs,
+depth 13** (two detector CNOTs plus one SWAP). The full table is regenerated into `results/hardware_results.csv`.
 
 ![Device-like noise study](figures/hardware_noise.png)
 
 Three things change once the noise is realistic:
 
-1. **Under depolarizing gate noise plus readout error, the parity check never pays.** At every scale the detected
-   fidelity is slightly *below* raw (-0.002 at x0.25 to -0.075 at x8) while 2-30 % of shots are discarded. The five
-   extra routed CNOTs inject about as much error as the check removes, and the check is blind to the readout error that
-   dominates the remainder.
+1. **Under depolarizing gate noise plus readout error, the parity check never beats the raw circuit.** At every scale
+   the detected fidelity is below raw (-0.002 at x0.25 to -0.075 at x8) while 1-30 % of shots are discarded. Measured
+   against the control that pays the same routing, the check itself recovers only +0.003 to +0.018, less than the
+   routing costs (-0.006 to -0.073), and it is blind to the readout error that dominates the remainder.
 2. **Readout mitigation is the lever the budget points to.** Four calibration circuits recover +0.03 (x0.5) to +0.21
    (x4) of fidelity with no shots discarded, on every noise source.
-3. **Detection does pay on the `FakeManilaV2` snapshot (+0.08 at 88 % acceptance).** That snapshot's dominant error is
-   T1 relaxation, which acts like a bit flip toward |0> on the data qubits, i.e. exactly the error class a Z-parity check
-   sees. This is the operating-map result of the previous section restated on calibration data: detection helps when the
-   errors it can see outweigh the errors it adds, and not otherwise. (The 1.000 entry is the plug-in estimator saturating
-   after mitigation, not evidence of a perfect state; see Limits.)
+3. **On the `FakeManilaV2` snapshot the detector looks like it pays (+0.08 over raw), and the control shows it does
+   not.** Qubit 2 in that snapshot has a 9.6 % readout error against 2.2 % on qubit 1 and 1.4 % on qubit 3. The raw
+   circuit reads `data_1` on qubit 2; the routed detector reads it on qubit 3. Raw + swap, which makes the same move
+   and runs no check, reaches 0.904 while keeping every shot; detection reaches 0.897 while discarding 12 % of shots,
+   most of them syndrome readouts on the noisy qubit 2 rather than caught data errors. With the snapshot's readout
+   error removed, detection costs 0.032 against raw and 0.007 against the control, the same sign as the synthetic
+   sweep. The gain came from qubit placement, which is error *suppression*, not from error detection.
 
 ## Limits on the Claim
 
@@ -123,7 +133,8 @@ Three things change once the noise is realistic:
 - This is error detection with postselection, not fault-tolerant error correction.
 - Real detector CNOTs add errors, routing, calibration drift, and execution time that this compact model does not fully represent.
 - Simulator evidence does not establish practical hardware performance. The synthetic device model is depolarizing plus symmetric readout error; the `FakeManilaV2` snapshot adds relaxation but is a 2021 calibration, not a current device.
-- Assignment-matrix readout mitigation assumes uncorrelated, stationary readout error and can saturate at 1.000 after clipping; it is reported alongside, not instead of, the raw numbers.
+- Assignment-matrix readout mitigation assumes uncorrelated, stationary readout error, and its matrix is only valid for the physical qubits it was calibrated on; it is reported alongside, not instead of, the raw numbers.
+- The raw + swap control isolates the parity check from the routing cost on this one layout. Another layout, or a three-CNOT nearest-neighbour check, would split the costs differently.
 - Fidelity estimates have finite-shot uncertainty. The reported zero plug-in error for an observed perfect correlation follows the specified estimator and does not prove a zero true error rate.
 - The 0.5 target-state witness concerns overlap with `|Phi+>`; it is not universal certification of a device or application.
 

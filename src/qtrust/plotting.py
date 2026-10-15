@@ -141,6 +141,24 @@ def plot_detection_cost(summary: pd.DataFrame, output_directory: str | Path) -> 
     plt.close(figure)
 
 
+def _cell_edges(values: np.ndarray, minimum_half_width: float) -> np.ndarray:
+    """Cell boundaries halfway between neighbouring sample values.
+
+    The sweep grids are not uniform (p steps 0.01, then 0.03, then 0.05), so a
+    plain ``imshow`` with ``extent`` would draw equal-width cells and put the
+    p=0.10 column at x~0.13. Centring each cell on its true sample value keeps
+    the axis honest; the lower edge is clamped at 0 because negative
+    probabilities were not sampled.
+    """
+
+    if len(values) == 1:
+        return np.array([max(0.0, values[0] - minimum_half_width), values[0] + minimum_half_width])
+    midpoints = (values[:-1] + values[1:]) / 2.0
+    first = max(0.0, values[0] - (midpoints[0] - values[0]))
+    last = values[-1] + (values[-1] - midpoints[-1])
+    return np.concatenate([[first], midpoints, [last]])
+
+
 def plot_usefulness_map(summary: pd.DataFrame, output_directory: str | Path) -> None:
     """Plot where noisy parity detection improves or harms fidelity."""
 
@@ -152,30 +170,32 @@ def plot_usefulness_map(summary: pd.DataFrame, output_directory: str | Path) -> 
     values = pivot.to_numpy(dtype=float)
     bound = max(abs(float(np.nanmin(values))), abs(float(np.nanmax(values))), 1e-3)
 
-    x_min, x_max = float(pivot.columns.min()), float(pivot.columns.max())
-    y_min, y_max = float(pivot.index.min()), float(pivot.index.max())
-    if np.isclose(x_min, x_max):
-        x_min, x_max = x_min - 0.005, x_max + 0.005
-    if np.isclose(y_min, y_max):
-        y_min, y_max = y_min - 0.001, y_max + 0.001
-
-    figure, axis = plt.subplots(figsize=(9.0, 4.9))
-    image = axis.imshow(
-        values,
-        origin="lower",
-        aspect="auto",
-        cmap="RdBu_r",
-        norm=TwoSlopeNorm(vmin=-bound, vcenter=0.0, vmax=bound),
-        extent=[x_min, x_max, y_min, y_max],
-    )
     x_values = pivot.columns.to_numpy(dtype=float)
     y_values = pivot.index.to_numpy(dtype=float)
-    if np.nanmin(values) < 0 < np.nanmax(values):
+    x_edges = _cell_edges(x_values, 0.005)
+    y_edges = _cell_edges(y_values, 0.001)
+
+    figure, axis = plt.subplots(figsize=(9.0, 4.9))
+    mesh = axis.pcolormesh(
+        x_edges,
+        y_edges,
+        values,
+        cmap="RdBu_r",
+        norm=TwoSlopeNorm(vmin=-bound, vcenter=0.0, vmax=bound),
+        shading="flat",
+        edgecolors="white",
+        linewidth=0.4,
+    )
+    if values.shape[0] > 1 and values.shape[1] > 1 and np.nanmin(values) < 0 < np.nanmax(values):
         axis.contour(x_values, y_values, values, levels=[0.0], colors="black", linewidths=1.3)
-    colorbar = figure.colorbar(image, ax=axis, pad=0.02)
+    axis.set_xticks(x_values)
+    axis.set_yticks(y_values)
+    axis.tick_params(axis="x", labelsize=8, rotation=45)
+    axis.tick_params(axis="y", labelsize=8)
+    colorbar = figure.colorbar(mesh, ax=axis, pad=0.02)
     colorbar.set_label("Detected fidelity minus raw fidelity")
     axis.set(
-        xlabel="Data bit-flip probability p",
+        xlabel="Data bit-flip probability p (ticks mark the sampled values)",
         ylabel="Detector depolarizing probability q",
         title="Operating region where parity detection helps or hurts",
     )
@@ -193,4 +213,3 @@ def create_all_figures(summary: pd.DataFrame, output_directory: str | Path) -> N
     plot_fidelity(summary, output_path)
     plot_detection_cost(summary, output_path)
     plot_usefulness_map(summary, output_path)
-
