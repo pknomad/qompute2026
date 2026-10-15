@@ -64,7 +64,15 @@ With perfect data and detector noise q equals 0.02, adding the detector reduced 
 
 Our main limitations are deliberate: independent X noise is not a complete IBM hardware model, the check misses arbitrary phase errors, and simulator results do not establish real-device performance. Real routing, readout error, calibration drift, and queue cost can change the boundary.
 
-## 6:15 to 6:40 Conclusion
+## 6:15 to 7:05 Device-Like Noise
+
+[Show the device-like noise figure.]
+
+So we tested that. We repeated the comparison with depolarizing error on every CNOT, readout error, and routing on the five-qubit Manila line, where the detector needs a SWAP. That SWAP moves a data qubit, so we added a control: the same Bell pair and SWAP with no parity check.
+
+Under synthetic device noise, detected fidelity was below raw at every scale, and the check itself was worth at most 0.018 over the control. On the FakeManilaV2 snapshot, detection looked like a gain of 0.08. The control explains it: the SWAP moves data one from qubit two, with 9.6 percent readout error, to qubit three, with 1.4 percent. The swap alone reached 0.904 keeping every shot; detection reached 0.897 keeping 88 percent. The real lever was readout mitigation, which recovered 0.16 on that snapshot without discarding a shot.
+
+## 7:05 to 7:30 Conclusion
 
 [Show the final slide with the reproduction command.]
 

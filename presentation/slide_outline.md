@@ -1,4 +1,4 @@
-# Q TRUST Eight Slide Presentation Outline
+# Q TRUST Nine Slide Presentation Outline
 
 ## Slide 1 The Trust Question
 
@@ -51,7 +51,15 @@
 - Limits: X-only data channel, no arbitrary phase detection, simulation only, postselection rather than correction.
 - Visual: `figures/detector_usefulness.png`.
 
-## Slide 8 Access and Conclusion
+## Slide 8 Device-Like Noise Needs a Control
+
+- Repeat raw versus detected with depolarizing error on every CNOT, readout error, and routing on the five-qubit `ibmq_manila` line, where the detector's second CNOT costs a SWAP.
+- Control: raw + swap runs the Bell pair plus the same SWAP with no parity check. Under synthetic device noise, detected fidelity is below raw at every scale, and the check itself is worth at most +0.018 over the control.
+- `FakeManilaV2` snapshot: detected `0.897` versus raw `0.814` looks like +0.08 from detection, but the SWAP moves `data_1` from qubit 2 (9.6% readout error) to qubit 3 (1.4%). Raw + swap reaches `0.904` at 100% acceptance; detection reaches `0.897` at 88%. The gain is placement, not detection.
+- Lever: readout mitigation from four calibration circuits recovers +0.03 (x0.5) to +0.21 (x4), and +0.16 on the Manila snapshot, with no shots discarded.
+- Visual: `figures/hardware_noise.png`.
+
+## Slide 9 Access and Conclusion
 
 - Trustworthy evidence costs qubits, gates, shots, runtime, and cloud access.
 - Publish raw and handled outcomes together with yield, uncertainty, and assumptions.
