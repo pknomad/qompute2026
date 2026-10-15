@@ -170,9 +170,10 @@ CITATIONS.md             sources and reused-material disclosures
 
 ## Team and Submission
 
-- Team: **Team 20** — Jason Kang, Rut Patel, Resham Patil, Alan Ma
+- Team: **NoQompute** — Jason Kang, Rut Patel, Resham Patil, Alan Ma
 
 ## References and License
 
 See [CITATIONS.md](CITATIONS.md) for the challenge, Qiskit, Bell-state, and parity-check sources. The code is released under the [MIT License](LICENSE). No code or prose from the supplied starter notebook was copied into the implementation.
+
 
