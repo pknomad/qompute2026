@@ -15,7 +15,10 @@
 8. IBM Quantum Learning. [Quantum error correction](https://quantum.cloud.ibm.com/learning/en/courses/foundations-of-quantum-error-correction). Stabilizer measurements, syndrome information, and the distinction between detection and correction. Accessed October 14, 2026.
 9. Michael A. Nielsen and Isaac L. Chuang. *Quantum Computation and Quantum Information*, 10th Anniversary Edition. Cambridge University Press, 2010. Bell states and quantum error correction.
 
+10. IBM Quantum. [Fake backends (`qiskit_ibm_runtime.fake_provider`)](https://quantum.cloud.ibm.com/docs/en/guides/fake-provider). `FakeManilaV2` calibration snapshot used in the device-like noise study. Accessed October 15, 2026.
+11. IBM Quantum. [Error mitigation and suppression techniques](https://quantum.cloud.ibm.com/docs/en/guides/error-mitigation-and-suppression-techniques). Readout (measurement) error mitigation by assignment-matrix inversion. Accessed October 15, 2026.
+
 ## Software
 
-The executed environment used Qiskit 2.5.2, Qiskit Aer 0.17.2, NumPy 2.5.4, pandas 3.0.6, and Matplotlib 3.11.2. Exact versions are recorded in `environment.yml` and `requirements.txt`.
+The executed environment used Qiskit 2.5.2, Qiskit Aer 0.17.2, qiskit-ibm-runtime 0.50.0, NumPy 2.5.4, pandas 3.0.6, and Matplotlib 3.11.2. Exact versions are recorded in `environment.yml` and `requirements.txt`.
 
