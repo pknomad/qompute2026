@@ -1,0 +1,126 @@
+{
+  "completed_at_utc": "2026-10-15T09:23:13.076517Z",
+  "shots_per_basis": 8192,
+  "shots_per_readout_calibration_circuit": 8192,
+  "seed_simulator": 2026,
+  "seed_transpiler": 2026,
+  "optimization_level": 1,
+  "runtime_seconds": 4.730644377996214,
+  "software_versions": {
+    "python": "3.12.14",
+    "qiskit": "2.5.2",
+    "qiskit_aer": "0.17.2",
+    "qiskit_ibm_runtime": "0.50.0",
+    "numpy": "2.5.4",
+    "pandas": "3.0.6",
+    "matplotlib": "3.11.2"
+  },
+  "basis_gates": [
+    "cx",
+    "id",
+    "rz",
+    "sx",
+    "x"
+  ],
+  "coupling_map_edges": [
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      0
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      2,
+      1
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      3,
+      2
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      4,
+      3
+    ]
+  ],
+  "initial_layouts": {
+    "raw": [
+      1,
+      2
+    ],
+    "raw+swap": [
+      1,
+      2,
+      3
+    ],
+    "detected": [
+      1,
+      2,
+      3
+    ]
+  },
+  "synthetic_base_rates": {
+    "p_cx": 0.01,
+    "p_1q": 0.0005,
+    "p_ro": 0.02
+  },
+  "synthetic_scales": [
+    0.0,
+    0.25,
+    0.5,
+    1.0,
+    2.0,
+    4.0,
+    8.0
+  ],
+  "fake_manila": {
+    "included": true,
+    "identity": "FakeManilaV2 bundled historical calibration snapshot",
+    "current_hardware_performance": false,
+    "source_labels": [
+      "FakeManilaV2 snapshot",
+      "FakeManilaV2 snapshot, readout error removed"
+    ]
+  },
+  "strategies": [
+    "raw",
+    "raw+swap",
+    "detected",
+    "raw+romit",
+    "raw+swap+romit",
+    "detected+romit"
+  ],
+  "readout_calibration": {
+    "method": "two-qubit 4x4 assignment-matrix inversion",
+    "prepared_states": [
+      "00",
+      "01",
+      "10",
+      "11"
+    ],
+    "physical_qubits": "calibrated where each compiled strategy measures its data bits after routing",
+    "postprocessing": "solve, clip negative probabilities to zero, and renormalize"
+  },
+  "uncertainty": {
+    "unmitigated": "binomial shot-only plug-in estimate",
+    "readout_mitigated": "omitted: calibration, assignment-matrix inversion, and clipping uncertainty are not propagated"
+  },
+  "outputs": {
+    "results": "results/hardware_results.csv",
+    "figure": "figures/hardware_noise.png",
+    "metadata": "results/hardware_run_metadata.json"
+  }
+}

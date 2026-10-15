@@ -10,12 +10,12 @@ noise that looks like a real device instead:
 * the circuits are routed on a five-qubit line (the ``FakeManilaV2`` coupling
   map), so the detector pays for a SWAP that the logical circuit hides.
 
-Two noise sources are compared: a synthetic device model whose three error
-rates are scaled together by a factor ``scale`` (``scale=1`` is roughly a
-2021-class Falcon processor such as ibmq_manila; ``scale~4`` is 2016-class;
-``scale~0.5`` matches the two-qubit error of a 2026 Heron), and the calibration
-snapshot shipped with ``qiskit_ibm_runtime``'s ``FakeManilaV2``, run once as
-shipped and once with its readout error removed.
+Two noise sources are compared: a synthetic device model whose three explicitly
+defined error probabilities are scaled together by a factor ``scale``, and the
+historical calibration snapshot shipped with ``qiskit_ibm_runtime``'s
+``FakeManilaV2``, run once as supplied and once with its readout error removed.
+The synthetic scale is not mapped to a hardware generation or calibration
+metric.
 
 Three circuits are compared on every source:
 
@@ -57,9 +57,15 @@ RAW_LAYOUT = [1, 2]          # data0, data1 on adjacent line qubits
 DETECTOR_LAYOUT = [1, 2, 3]  # data0, data1, syndrome: one detector CNOT needs routing
 
 BASE_RATES = {"p_cx": 0.010, "p_1q": 0.0005, "p_ro": 0.020}
+TRANSPILER_OPTIMIZATION_LEVEL = 1
 
 FAKE_MANILA_LABEL = "FakeManilaV2 snapshot"
 FAKE_MANILA_NO_READOUT_LABEL = "FakeManilaV2 snapshot, readout error removed"
+UNMITIGATED_UNCERTAINTY = "binomial shot-only plug-in estimate"
+MITIGATED_UNCERTAINTY = (
+    "omitted: calibration, assignment-matrix inversion, and clipping uncertainty "
+    "are not propagated"
+)
 
 
 @dataclass(frozen=True)
@@ -86,6 +92,12 @@ def device_noise_model(p_cx: float, p_1q: float, p_ro: float) -> NoiseModel:
 
 def scaled_rates(scale: float) -> dict[str, float]:
     return {key: min(1.0, value * scale) for key, value in BASE_RATES.items()}
+
+
+def synthetic_source_label(scale: float) -> str:
+    """Return a neutral label tied only to the defined synthetic baseline."""
+
+    return f"synthetic {scale:g}x baseline"
 
 
 def fake_manila_backend(*, readout_error: bool = True) -> tuple[AerSimulator, dict[str, float]]:
@@ -173,7 +185,7 @@ def _compile(circuit: QuantumCircuit, layout: list[int], seed: int) -> QuantumCi
         basis_gates=BASIS_GATES,
         coupling_map=LINE,
         initial_layout=layout,
-        optimization_level=1,
+        optimization_level=TRANSPILER_OPTIMIZATION_LEVEL,
         seed_transpiler=seed,
     )
 
@@ -293,7 +305,12 @@ def run_case(
         "readout_mitigated": mitigated,
         "data_qubits": ";".join(f"q{a},q{b}" for a, b in sorted(data_qubits)),
         "fidelity": bell_fidelity(correlations),
-        "fidelity_standard_error": fidelity_standard_error(errors),
+        "fidelity_standard_error": (
+            np.nan if mitigated else fidelity_standard_error(errors)
+        ),
+        "uncertainty_scope": (
+            MITIGATED_UNCERTAINTY if mitigated else UNMITIGATED_UNCERTAINTY
+        ),
         "correlation_XX": correlations["X"],
         "correlation_YY": correlations["Y"],
         "correlation_ZZ": correlations["Z"],
@@ -307,7 +324,14 @@ def run_hardware_study(config: HardwareConfig) -> pd.DataFrame:
     sources: list[tuple[str, float, AerSimulator, dict[str, float]]] = []
     for scale in config.scales:
         rates = scaled_rates(scale)
-        sources.append((f"synthetic x{scale:g}", scale, AerSimulator(noise_model=device_noise_model(**rates)), rates))
+        sources.append(
+            (
+                synthetic_source_label(scale),
+                scale,
+                AerSimulator(noise_model=device_noise_model(**rates)),
+                rates,
+            )
+        )
     if config.include_fake_manila:
         backend, rates = fake_manila_backend()
         sources.append((FAKE_MANILA_LABEL, np.nan, backend, rates))

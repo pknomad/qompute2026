@@ -29,6 +29,10 @@ def test_noiseless_device_gives_unit_fidelity_for_every_strategy():
     }
     assert (frame["fidelity"] > 0.99).all()
     assert (frame.loc[frame["strategy"] == "detected", "acceptance_rate"] > 0.99).all()
+    assert set(frame["source"]) == {"synthetic 0x baseline"}
+    assert frame.loc[~frame["readout_mitigated"], "fidelity_standard_error"].notna().all()
+    assert frame.loc[frame["readout_mitigated"], "fidelity_standard_error"].isna().all()
+    assert frame.loc[frame["readout_mitigated"], "uncertainty_scope"].str.startswith("omitted:").all()
     cx = frame.groupby("strategy")["cx_count"].max()
     assert cx["raw"] < cx["raw+swap"] < cx["detected"]
     # the control is the reference for itself, so its improvement column is exactly zero

@@ -8,4 +8,5 @@ htmlcov/
 .venv/
 .tmp/
 *.egg-info/
-
+PROJECT_AUDIT_AND_IMPROVEMENT_PROMPT.md
+Q_TRUST_submission.zip
